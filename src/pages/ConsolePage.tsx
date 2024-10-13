@@ -27,6 +27,7 @@ import { Teleprompter } from '../components/Teleprompter/Teleprompter';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
+import { FormConfig } from '../utils/form_configs';
 
 /**
  * Type for result from get_weather() function call
@@ -55,7 +56,7 @@ interface RealtimeEvent {
   event: { [key: string]: any };
 }
 
-export function ConsolePage() {
+export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   /**
    * Ask user for API Key
    * If we're using the local relay server, we don't need this
@@ -379,7 +380,7 @@ export function ConsolePage() {
     const client = clientRef.current;
 
     // Set instructions
-    client.updateSession({ instructions: instructions });
+    client.updateSession({ instructions: formConfig.instructions });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
 
