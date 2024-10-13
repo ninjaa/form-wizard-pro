@@ -455,6 +455,52 @@ export function ConsolePage() {
       }
     );
 
+    // Add submit_form tool
+    client.addTool(
+      {
+        name: 'submit_form',
+        description: 'Submits the completed booking form and user profile information.',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+      async () => {
+        // Collect all form data and user profile information
+        const formData = {
+          bookingInfo: {
+            name: memoryKv.name,
+            email: memoryKv.email,
+            destination: memoryKv.destination,
+            departureDate: memoryKv.departureDate,
+            returnDate: memoryKv.returnDate,
+            passengers: memoryKv.passengers,
+            travelClass: memoryKv.travelClass,
+            dietaryPreferences: memoryKv.dietaryPreferences,
+          },
+          userProfile: {
+            budget: memoryKv.budget,
+            travelFrequency: memoryKv.travelFrequency,
+            loyaltyInterest: memoryKv.loyaltyInterest,
+          },
+          additionalInfo: {} as { [key: string]: any },
+        };
+
+        // Collect any additional information stored in memoryKv
+        for (const [key, value] of Object.entries(memoryKv)) {
+          if (!Object.keys(formData.bookingInfo).includes(key) && 
+              !Object.keys(formData.userProfile).includes(key)) {
+            formData.additionalInfo[key] = value;
+          }
+        }
+
+        // In a real application, you'd send this data to a server
+        console.log('Form and profile data submitted:', formData);
+        return { success: true, message: 'Booking and profile information submitted successfully!' };
+      }
+    );
+
     // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
       setRealtimeEvents((realtimeEvents) => {
