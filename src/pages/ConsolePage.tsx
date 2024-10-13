@@ -23,6 +23,7 @@ import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
 import { Map } from '../components/Map';
+import { Teleprompter } from '../components/Teleprompter/Teleprompter';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
@@ -124,6 +125,7 @@ export function ConsolePage() {
     lng: -122.418137,
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
+  const [teleprompterText, setTeleprompterText] = useState<string>('');
 
   /**
    * Utility for formatting the timing of logs
@@ -501,6 +503,28 @@ export function ConsolePage() {
       }
     );
 
+    // Add update_teleprompter tool
+    client.addTool(
+      {
+        name: 'update_teleprompter',
+        description: 'Updates the teleprompter with the given text.',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'The text to display on the teleprompter.',
+            },
+          },
+          required: ['text'],
+        },
+      },
+      async ({ text }: { text: string }) => {
+        setTeleprompterText(text);
+        return { success: true };
+      }
+    );
+
     // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
       setRealtimeEvents((realtimeEvents) => {
@@ -567,6 +591,9 @@ export function ConsolePage() {
             />
           )}
         </div>
+      </div>
+      <div className="teleprompter-container">
+        <Teleprompter text={teleprompterText} />
       </div>
       <div className="content-main">
         <div className="content-logs">

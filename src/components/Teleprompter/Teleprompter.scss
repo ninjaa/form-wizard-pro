@@ -1,0 +1,15 @@
+.teleprompter {
+  background-color: #000;
+  color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .teleprompter-content {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.4;
+  }
+}
