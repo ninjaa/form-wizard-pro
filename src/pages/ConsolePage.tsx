@@ -144,7 +144,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   const [progress, setProgress] = useState(0);
 
   const teleprompterRef = useRef<HTMLDivElement>(null);
-  const [fontSize, setFontSize] = useState(48); // Initial font size
+  const [fontSize, setFontSize] = useState(42); // Initial font size
 
   // Add this new state for openLinkUrl
   const [openLinkUrl, setOpenLinkUrl] = useState<string | null>(null);
@@ -155,15 +155,18 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       const content = container.firstChild as HTMLElement;
 
       if (content) {
-        let currentFontSize = 48;
-        content.style.fontSize = `${currentFontSize}px`;
+        content.style.fontSize = '42px';
+        content.style.whiteSpace = 'normal';
+        content.style.overflowWrap = 'break-word';
 
-        while (content.scrollHeight > container.clientHeight && currentFontSize > 12) {
-          currentFontSize--;
-          content.style.fontSize = `${currentFontSize}px`;
+        const lineHeight = parseFloat(getComputedStyle(content).lineHeight);
+        const maxHeight = lineHeight * 2;
+
+        while (content.scrollHeight > maxHeight && parseFloat(content.style.fontSize) > 12) {
+          content.style.fontSize = `${parseFloat(content.style.fontSize) - 1}px`;
         }
 
-        setFontSize(currentFontSize);
+        setFontSize(parseFloat(content.style.fontSize));
       }
     }
   }, [teleprompterText]);
