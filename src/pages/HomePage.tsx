@@ -9,9 +9,9 @@ export const HomePage: React.FC = () => {
       <h1>Welcome to Multi-Form Booking</h1>
       <nav>
         <ul>
-          {Object.entries(formConfigs).map(([key, config]) => (
-            <li key={key}>
-              <Link to={`/${key}`}>{config.title}</Link>
+          {formConfigs.map((config) => (
+            <li key={config.slug}>
+              <Link to={`/${config.slug}`}>{config.title}</Link>
             </li>
           ))}
         </ul>

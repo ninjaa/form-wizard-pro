@@ -27,7 +27,7 @@ import { Teleprompter } from '../components/Teleprompter/Teleprompter';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
-import { FormConfig } from '../utils/form_configs';
+import { FormConfig, getInstructions } from '../utils/form_configs';
 
 /**
  * Type for result from get_weather() function call
@@ -386,7 +386,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
     const client = clientRef.current;
 
     // Set instructions
-    client.updateSession({ instructions: formConfig.instructions });
+    client.updateSession({ instructions: getInstructions(formConfig.slug) });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
 
@@ -575,7 +575,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       // cleanup; resets to defaults
       client.reset();
     };
-  }, [formConfig.instructions]); // Add formConfig.instructions as a dependency if it's not already
+  }, [formConfig.slug]); // Change dependency to formConfig.slug
 
   /**
    * Render the application

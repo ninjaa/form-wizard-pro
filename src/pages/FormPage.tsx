@@ -6,7 +6,7 @@ import './FormPage.scss';
 
 export const FormPage: React.FC = () => {
   const { formType } = useParams<{ formType: string }>();
-  const formConfig = formConfigs[formType || ''];
+  const formConfig = formConfigs.find(config => config.slug === formType);
 
   if (!formConfig) {
     return <div>Form not found</div>;
