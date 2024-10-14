@@ -290,10 +290,19 @@
     margin-bottom: 20px;
 
     .teleprompter {
-      font-size: 24px;
       color: #ffffff;
       text-align: center;
       margin-bottom: 20px;
+      height: 150px; // Increased fixed height
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden; // Hide overflow instead of scrolling
+
+      & > div {
+        max-width: 100%; // Ensure text doesn't overflow horizontally
+        transition: font-size 0.3s ease; // Smooth transition for font size changes
+      }
     }
 
     .progress-container {

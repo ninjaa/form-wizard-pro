@@ -142,6 +142,28 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
+  const teleprompterRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(48); // Initial font size
+
+  useEffect(() => {
+    if (teleprompterRef.current) {
+      const container = teleprompterRef.current;
+      const content = container.firstChild as HTMLElement;
+
+      if (content) {
+        let currentFontSize = 48;
+        content.style.fontSize = `${currentFontSize}px`;
+
+        while (content.scrollHeight > container.clientHeight && currentFontSize > 12) {
+          currentFontSize--;
+          content.style.fontSize = `${currentFontSize}px`;
+        }
+
+        setFontSize(currentFontSize);
+      }
+    }
+  }, [teleprompterText]);
+
   /**
    * Utility for formatting the timing of logs
    */
@@ -622,7 +644,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   return (
     <div data-component="ConsolePage" data-console-hidden={!isConsoleVisible}>
       <div className="teleprompter-container">
-        <div className="teleprompter">{teleprompterText}</div>
+        <div className="teleprompter" ref={teleprompterRef}>
+          <div style={{ fontSize: `${fontSize}px` }}>{teleprompterText}</div>
+        </div>
         <ProgressBar />
       </div>
       {isConsoleVisible && (
@@ -688,8 +712,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
                           >
                             <div
                               className={`event-source ${event.type === 'error'
-                                  ? 'error'
-                                  : realtimeEvent.source
+                                ? 'error'
+                                : realtimeEvent.source
                                 }`}
                             >
                               {realtimeEvent.source === 'client' ? (
