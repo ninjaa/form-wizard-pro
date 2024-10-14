@@ -16,6 +16,14 @@
     flex-grow: 1;
   }
 
+  .content-top,
+  .content-main {
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
   .content-top {
     display: flex;
     align-items: center;
@@ -287,5 +295,19 @@
     margin: 0px 16px 16px;
     padding: 8px 0;
     border-top: 1px solid #e7e7e7;
+    transition: margin 0.3s ease-out;
+  }
+
+  &[data-console-hidden="true"] {
+    .content-top,
+    .content-main {
+      max-height: 0;
+      opacity: 0;
+      margin: 0;
+    }
+
+    .content-actions {
+      margin-top: 16px;
+    }
   }
 }

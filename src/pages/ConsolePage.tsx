@@ -19,7 +19,7 @@ import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
 import { instructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
-import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
+import { X, Edit, Zap, ArrowUp, ArrowDown, Tool } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
 import { Map } from '../components/Map';
@@ -127,6 +127,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
   const [teleprompterText, setTeleprompterText] = useState<string>('');
+
+  // Add this new state
+  const [isConsoleVisible, setIsConsoleVisible] = useState(true);
 
   /**
    * Utility for formatting the timing of logs
@@ -569,209 +572,219 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       // cleanup; resets to defaults
       client.reset();
     };
-  }, []);
+  }, [formConfig.instructions]); // Add formConfig.instructions as a dependency if it's not already
 
   /**
    * Render the application
    */
   return (
-    <div data-component="ConsolePage">
+    <div data-component="ConsolePage" data-console-hidden={!isConsoleVisible}>
       <div className="teleprompter-container">
         <Teleprompter text={teleprompterText} />
       </div>
-      <div className="content-top">
-        <div className="content-title">
-          <img src="/openai-logomark.svg" />
-          <span>realtime console</span>
-        </div>
-        <div className="content-api-key">
-          {!LOCAL_RELAY_SERVER_URL && (
-            <Button
-              icon={Edit}
-              iconPosition="end"
-              buttonStyle="flush"
-              label={`api key: ${apiKey.slice(0, 3)}...`}
-              onClick={() => resetAPIKey()}
-            />
-          )}
-        </div>
-      </div>
-      <div className="content-main">
-        <div className="content-logs">
-          <div className="content-block events">
-            <div className="visualization">
-              <div className="visualization-entry client">
-                <canvas ref={clientCanvasRef} />
-              </div>
-              <div className="visualization-entry server">
-                <canvas ref={serverCanvasRef} />
-              </div>
+      {isConsoleVisible && (
+        <>
+          <div className="content-top">
+            <div className="content-title">
+              <img src="/openai-logomark.svg" />
+              <span>realtime console</span>
             </div>
-            <div className="content-block-title">events</div>
-            <div className="content-block-body" ref={eventsScrollRef}>
-              {!realtimeEvents.length && `awaiting connection...`}
-              {realtimeEvents.map((realtimeEvent, i) => {
-                const count = realtimeEvent.count;
-                const event = { ...realtimeEvent.event };
-                if (event.type === 'input_audio_buffer.append') {
-                  event.audio = `[trimmed: ${event.audio.length} bytes]`;
-                } else if (event.type === 'response.audio.delta') {
-                  event.delta = `[trimmed: ${event.delta.length} bytes]`;
-                }
-                return (
-                  <div className="event" key={event.event_id}>
-                    <div className="event-timestamp">
-                      {formatTime(realtimeEvent.time)}
-                    </div>
-                    <div className="event-details">
-                      <div
-                        className="event-summary"
-                        onClick={() => {
-                          // toggle event details
-                          const id = event.event_id;
-                          const expanded = { ...expandedEvents };
-                          if (expanded[id]) {
-                            delete expanded[id];
-                          } else {
-                            expanded[id] = true;
-                          }
-                          setExpandedEvents(expanded);
-                        }}
-                      >
-                        <div
-                          className={`event-source ${event.type === 'error'
-                              ? 'error'
-                              : realtimeEvent.source
-                            }`}
-                        >
-                          {realtimeEvent.source === 'client' ? (
-                            <ArrowUp />
-                          ) : (
-                            <ArrowDown />
-                          )}
-                          <span>
-                            {event.type === 'error'
-                              ? 'error!'
-                              : realtimeEvent.source}
-                          </span>
-                        </div>
-                        <div className="event-type">
-                          {event.type}
-                          {count && ` (${count})`}
-                        </div>
-                      </div>
-                      {!!expandedEvents[event.event_id] && (
-                        <div className="event-payload">
-                          {JSON.stringify(event, null, 2)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="content-block conversation">
-            <div className="content-block-title">conversation</div>
-            <div className="content-block-body" data-conversation-content>
-              {!items.length && `awaiting connection...`}
-              {items.map((conversationItem, i) => {
-                return (
-                  <div className="conversation-item" key={conversationItem.id}>
-                    <div className={`speaker ${conversationItem.role || ''}`}>
-                      <div>
-                        {(
-                          conversationItem.role || conversationItem.type
-                        ).replaceAll('_', ' ')}
-                      </div>
-                      <div
-                        className="close"
-                        onClick={() =>
-                          deleteConversationItem(conversationItem.id)
-                        }
-                      >
-                        <X />
-                      </div>
-                    </div>
-                    <div className={`speaker-content`}>
-                      {/* tool response */}
-                      {conversationItem.type === 'function_call_output' && (
-                        <div>{conversationItem.formatted.output}</div>
-                      )}
-                      {/* tool call */}
-                      {!!conversationItem.formatted.tool && (
-                        <div>
-                          {conversationItem.formatted.tool.name}(
-                          {conversationItem.formatted.tool.arguments})
-                        </div>
-                      )}
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'user' && (
-                          <div>
-                            {conversationItem.formatted.transcript ||
-                              (conversationItem.formatted.audio?.length
-                                ? '(awaiting transcript)'
-                                : conversationItem.formatted.text ||
-                                '(item sent)')}
-                          </div>
-                        )}
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'assistant' && (
-                          <div>
-                            {conversationItem.formatted.transcript ||
-                              conversationItem.formatted.text ||
-                              '(truncated)'}
-                          </div>
-                        )}
-                      {conversationItem.formatted.file && (
-                        <audio
-                          src={conversationItem.formatted.file.url}
-                          controls
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        <div className="content-right">
-          <div className="content-block map">
-            <div className="content-block-title">get_weather()</div>
-            <div className="content-block-title bottom">
-              {marker?.location || 'not yet retrieved'}
-              {!!marker?.temperature && (
-                <>
-                  <br />
-                  🌡️ {marker.temperature.value} {marker.temperature.units}
-                </>
-              )}
-              {!!marker?.wind_speed && (
-                <>
-                  {' '}
-                  🍃 {marker.wind_speed.value} {marker.wind_speed.units}
-                </>
-              )}
-            </div>
-            <div className="content-block-body full">
-              {coords && (
-                <Map
-                  center={[coords.lat, coords.lng]}
-                  location={coords.location}
+            <div className="content-api-key">
+              {!LOCAL_RELAY_SERVER_URL && (
+                <Button
+                  icon={Edit}
+                  iconPosition="end"
+                  buttonStyle="flush"
+                  label={`api key: ${apiKey.slice(0, 3)}...`}
+                  onClick={() => resetAPIKey()}
                 />
               )}
             </div>
           </div>
-          <div className="content-block kv">
-            <div className="content-block-title">set_memory()</div>
-            <div className="content-block-body content-kv">
-              {JSON.stringify(memoryKv, null, 2)}
+          <div className="content-main">
+            <div className="content-logs">
+              <div className="content-block events">
+                <div className="visualization">
+                  <div className="visualization-entry client">
+                    <canvas ref={clientCanvasRef} />
+                  </div>
+                  <div className="visualization-entry server">
+                    <canvas ref={serverCanvasRef} />
+                  </div>
+                </div>
+                <div className="content-block-title">events</div>
+                <div className="content-block-body" ref={eventsScrollRef}>
+                  {!realtimeEvents.length && `awaiting connection...`}
+                  {realtimeEvents.map((realtimeEvent, i) => {
+                    const count = realtimeEvent.count;
+                    const event = { ...realtimeEvent.event };
+                    if (event.type === 'input_audio_buffer.append') {
+                      event.audio = `[trimmed: ${event.audio.length} bytes]`;
+                    } else if (event.type === 'response.audio.delta') {
+                      event.delta = `[trimmed: ${event.delta.length} bytes]`;
+                    }
+                    return (
+                      <div className="event" key={event.event_id}>
+                        <div className="event-timestamp">
+                          {formatTime(realtimeEvent.time)}
+                        </div>
+                        <div className="event-details">
+                          <div
+                            className="event-summary"
+                            onClick={() => {
+                              // toggle event details
+                              const id = event.event_id;
+                              const expanded = { ...expandedEvents };
+                              if (expanded[id]) {
+                                delete expanded[id];
+                              } else {
+                                expanded[id] = true;
+                              }
+                              setExpandedEvents(expanded);
+                            }}
+                          >
+                            <div
+                              className={`event-source ${event.type === 'error'
+                                  ? 'error'
+                                  : realtimeEvent.source
+                                }`}
+                            >
+                              {realtimeEvent.source === 'client' ? (
+                                <ArrowUp />
+                              ) : (
+                                <ArrowDown />
+                              )}
+                              <span>
+                                {event.type === 'error'
+                                  ? 'error!'
+                                  : realtimeEvent.source}
+                              </span>
+                            </div>
+                            <div className="event-type">
+                              {event.type}
+                              {count && ` (${count})`}
+                            </div>
+                          </div>
+                          {!!expandedEvents[event.event_id] && (
+                            <div className="event-payload">
+                              {JSON.stringify(event, null, 2)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="content-block conversation">
+                <div className="content-block-title">conversation</div>
+                <div className="content-block-body" data-conversation-content>
+                  {!items.length && `awaiting connection...`}
+                  {items.map((conversationItem, i) => {
+                    return (
+                      <div className="conversation-item" key={conversationItem.id}>
+                        <div className={`speaker ${conversationItem.role || ''}`}>
+                          <div>
+                            {(
+                              conversationItem.role || conversationItem.type
+                            ).replaceAll('_', ' ')}
+                          </div>
+                          <div
+                            className="close"
+                            onClick={() =>
+                              deleteConversationItem(conversationItem.id)
+                            }
+                          >
+                            <X />
+                          </div>
+                        </div>
+                        <div className={`speaker-content`}>
+                          {/* tool response */}
+                          {conversationItem.type === 'function_call_output' && (
+                            <div>{conversationItem.formatted.output}</div>
+                          )}
+                          {/* tool call */}
+                          {!!conversationItem.formatted.tool && (
+                            <div>
+                              {conversationItem.formatted.tool.name}(
+                              {conversationItem.formatted.tool.arguments})
+                            </div>
+                          )}
+                          {!conversationItem.formatted.tool &&
+                            conversationItem.role === 'user' && (
+                              <div>
+                                {conversationItem.formatted.transcript ||
+                                  (conversationItem.formatted.audio?.length
+                                    ? '(awaiting transcript)'
+                                    : conversationItem.formatted.text ||
+                                    '(item sent)')}
+                              </div>
+                            )}
+                          {!conversationItem.formatted.tool &&
+                            conversationItem.role === 'assistant' && (
+                              <div>
+                                {conversationItem.formatted.transcript ||
+                                  conversationItem.formatted.text ||
+                                  '(truncated)'}
+                              </div>
+                            )}
+                          {conversationItem.formatted.file && (
+                            <audio
+                              src={conversationItem.formatted.file.url}
+                              controls
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <div className="content-right">
+              <div className="content-block map">
+                <div className="content-block-title">get_weather()</div>
+                <div className="content-block-title bottom">
+                  {marker?.location || 'not yet retrieved'}
+                  {!!marker?.temperature && (
+                    <>
+                      <br />
+                      🌡️ {marker.temperature.value} {marker.temperature.units}
+                    </>
+                  )}
+                  {!!marker?.wind_speed && (
+                    <>
+                      {' '}
+                      🍃 {marker.wind_speed.value} {marker.wind_speed.units}
+                    </>
+                  )}
+                </div>
+                <div className="content-block-body full">
+                  {coords && (
+                    <Map
+                      center={[coords.lat, coords.lng]}
+                      location={coords.location}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="content-block kv">
+                <div className="content-block-title">set_memory()</div>
+                <div className="content-block-body content-kv">
+                  {JSON.stringify(memoryKv, null, 2)}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
       <div className="content-actions">
+        <Button
+          icon={Tool}
+          buttonStyle="regular"
+          onClick={() => setIsConsoleVisible(!isConsoleVisible)}
+          label={isConsoleVisible ? "Hide Console" : "Show Console"}
+        />
         <Toggle
           defaultValue={false}
           labels={['manual', 'vad']}
