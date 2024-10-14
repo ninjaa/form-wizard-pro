@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { formConfigs } from '../utils/form_configs';
 import './HomePage.scss';
 
 export const HomePage: React.FC = () => {
@@ -8,9 +9,11 @@ export const HomePage: React.FC = () => {
       <h1>Welcome to Multi-Form Booking</h1>
       <nav>
         <ul>
-          <li><Link to="/flight-booking-form">Flight Booking</Link></li>
-          <li><Link to="/real-estate-8989-hacienda-ln">Real Estate Viewing</Link></li>
-          <li><Link to="/book-haircut">Haircut Booking</Link></li>
+          {Object.entries(formConfigs).map(([key, config]) => (
+            <li key={key}>
+              <Link to={`/${key}`}>{config.title}</Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </div>

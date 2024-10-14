@@ -1,6 +1,6 @@
 export interface FormConfig {
-  title: string;
-  instructions: string;
+    title: string;
+    instructions: string;
 }
 
 const sharedInstructions = `
@@ -40,10 +40,10 @@ ${specificInstructions}
 `;
 
 export const formConfigs: { [key: string]: FormConfig } = {
-  'flight-booking-form': {
-    title: 'Flight Booking',
-    instructions: createInstructions(
-      `{
+    'flight-booking-form': {
+        title: 'Flight Booking',
+        instructions: createInstructions(
+            `{
   "steps": [
     { "question": "What's your name?", "field": "name" },
     { "question": "What's your email address?", "field": "email" },
@@ -59,18 +59,18 @@ export const formConfigs: { [key: string]: FormConfig } = {
     { "question": "Ready to book?", "field": null }
   ]
 }`,
-      `- You are an AI travel agent guiding users through a flight booking form
+            `- You are an AI travel agent guiding users through a flight booking form
 - Collect and remember interesting facts about the user throughout the conversation
 - Be subtle and natural when asking optional questions (budget, travel frequency, etc.)
 - If the user seems hesitant or unwilling to provide optional information, move on politely
 - After completing the form, use the submit_form function to finalize the booking
 - In order to collect names and other proper nouns, if there is any confusion switch to gathering spellings letter by letter`
-    ),
-  },
-  'real-estate-8989-hacienda-ln': {
-    title: 'Real Estate Viewing - 8989 Hacienda Ln',
-    instructions: createInstructions(
-      `{
+        ),
+    },
+    'real-estate-8989-hacienda-ln': {
+        title: 'Real Estate Viewing - 8989 Hacienda Ln',
+        instructions: createInstructions(
+            `{
   "steps": [
     { "question": "What's your name?", "field": "name" },
     { "question": "What's your email address?", "field": "email" },
@@ -84,15 +84,15 @@ export const formConfigs: { [key: string]: FormConfig } = {
     { "question": "Ready to schedule the viewing?", "field": null }
   ]
 }`,
-      `- You are an AI real estate assistant helping users schedule a viewing for 8989 Hacienda Ln
+            `- You are an AI real estate assistant helping users schedule a viewing for 8989 Hacienda Ln
 - Provide brief information about the property when relevant (e.g., 4 bedrooms, 3 bathrooms, etc.)
 - After completing the form, use the submit_form function to schedule the viewing`
-    ),
-  },
-  'book-haircut': {
-    title: 'Haircut Booking',
-    instructions: createInstructions(
-      `{
+        ),
+    },
+    'book-haircut': {
+        title: 'Haircut Booking',
+        instructions: createInstructions(
+            `{
   "steps": [
     { "question": "What's your name?", "field": "name" },
     { "question": "What's your phone number?", "field": "phone" },
@@ -106,9 +106,30 @@ export const formConfigs: { [key: string]: FormConfig } = {
     { "question": "Ready to book your appointment?", "field": null }
   ]
 }`,
-      `- You are an AI assistant helping users book a haircut appointment
+            `- You are an AI assistant helping users book a haircut appointment
 - Provide brief information about available services or stylists when relevant
 - After completing the form, use the submit_form function to book the appointment`
-    ),
-  },
+        ),
+    },
+    'find-child-course': {
+        title: 'Find a Course for Your Child - Best Parents',
+        instructions: createInstructions(
+            `{
+  "steps": [
+    { "question": "What's the child's name?", "field": "childName" },
+    { "question": "What's the child's date of birth?", "field": "childBirthday" },
+    { "question": "Are you a parent, student, teacher, or consultant?", "field": "respondent" },
+    { "question": "What areas of interest are you looking for in a course?", "field": "interest" },
+    { "question": "Where would you like the course to be located?", "field": "location" },
+    { "question": "What's your name?", "field": "respondentName" },
+    { "question": "What's your email address?", "field": "respondentEmail" },
+    { "question": "Ready to find courses?", "field": null },
+  ]
+}`,
+            `- You are an AI assistant helping users find suitable courses for children
+- Provide brief information about available course types or locations when relevant
+- For the interest and location fields, allow multiple selections and use follow-up questions if needed
+- After completing the form, use the submit_form function to process the course search request`
+        ),
+    },
 };
