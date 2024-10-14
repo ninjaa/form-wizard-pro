@@ -1,8 +1,123 @@
 .form-page {
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f4f8; // Lighter, more vibrant background
+  font-family: 'Helvetica Neue', Arial, sans-serif;
 
-  h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
+  .form-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+
+    h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      text-align: center;
+      color: #2c3e50; // Darker, richer color for the title
+    }
+  }
+}
+
+// Adjustments for ConsolePage component
+[data-component='ConsolePage'] {
+  width: 100%;
+  max-width: 900px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .content-top {
+    display: none;
+  }
+
+  .content-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 40px;
+
+    .content-logs {
+      flex-grow: 1;
+      max-height: calc(100vh - 400px);
+      overflow-y: auto;
+    }
+
+    .content-right {
+      display: none;
+    }
+  }
+
+  .content-actions {
+    border-top: 1px solid #e0e0e0;
+    padding: 30px;
+    margin: 0;
+    background-color: #f8f9fa; // Light background for the action area
+
+    button {
+      border-radius: 30px;
+      font-size: 18px;
+      padding: 12px 24px;
+      background-color: #3498db; // Vibrant blue for buttons
+      color: #ffffff;
+      border: none;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #2980b9; // Darker blue on hover
+      }
+    }
+  }
+
+  .teleprompter-container {
+    margin: 0 0 30px 0;
+    background-color: #3498db; // Bright blue background
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .teleprompter {
+      font-size: 36px;
+      color: #ffd700; // Bright yellow text
+      line-height: 1.4;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); // Subtle text shadow for better readability
+    }
+  }
+}
+
+// Media query for larger screens
+@media (min-width: 1200px) {
+  .form-page .form-container {
+    padding: 60px;
+  }
+
+  [data-component='ConsolePage'] {
+    max-width: 1100px;
+
+    .content-main {
+      padding: 60px;
+    }
+
+    .teleprompter-container {
+      padding: 60px;
+
+      .teleprompter {
+        font-size: 48px;
+      }
+    }
   }
 }

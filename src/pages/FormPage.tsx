@@ -14,8 +14,10 @@ export const FormPage: React.FC = () => {
 
   return (
     <div className="form-page">
-      <h1>{formConfig.title}</h1>
-      <ConsolePage formConfig={formConfig} />
+      <div className="form-container">
+        <h1>{formConfig.title}</h1>
+        <ConsolePage formConfig={formConfig} />
+      </div>
     </div>
   );
 };
