@@ -126,7 +126,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
     lng: -122.418137,
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
-  const [teleprompterText, setTeleprompterText] = useState<string>('');
+  const [teleprompterText, setTeleprompterText] = useState<string>("Please click connect to start");
 
   // Add this new state
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
@@ -178,6 +178,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
     setIsConnected(true);
     setRealtimeEvents([]);
     setItems(client.conversation.getItems());
+
+    // Update teleprompter text to "Intro"
+    setTeleprompterText("Intro");
 
     // Connect to microphone
     await wavRecorder.begin();
