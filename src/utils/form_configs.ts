@@ -10,6 +10,10 @@ export interface FormConfig {
   personality: string;
   style: string;
   steps: { [key: string]: FormStep };
+  completionAction?: {
+    type: 'open_link';
+    instructions: string;
+  };
 }
 
 const sharedInstructions = `
@@ -168,6 +172,10 @@ export const formConfigs: FormConfig[] = [
       respondentEmail: { question: "What's your email address?", field: "respondentEmail" },
       ready: { question: "Ready to find courses?", field: null }
     },
+    completionAction: {
+      type: 'open_link',
+      instructions: `After form submission, construct a URL for the Best Parents search page using the collected information. The base URL is "https://www.bestparents.com/search". Add relevant query parameters based on the child's age, interests, and location. For example: ?query=USA+medicine+camps+for+16+year+olds`
+    }
   },
 ];
 

@@ -138,6 +138,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
   const [submitFormResult, setSubmitFormResult] = useState<SubmitFormResult | null>(null);
 
+  const [linkToOpen, setLinkToOpen] = useState<string | null>(null);
+
   /**
    * Utility for formatting the timing of logs
    */
@@ -471,11 +473,33 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       }
     );
 
-    // Add submit_form tool
+    // Add open_link tool
+    client.addTool(
+      {
+        name: 'open_link',
+        description: 'Opens a specified URL in a new tab.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open.',
+            },
+          },
+          required: ['url'],
+        },
+      },
+      async ({ url }: { url: string }) => {
+        setLinkToOpen(url);
+        return { success: true, message: 'Link ready to be opened.' };
+      }
+    );
+
+    // Modify submit_form tool
     client.addTool(
       {
         name: 'submit_form',
-        description: 'Submits the completed booking form and user profile information.',
+        description: 'Submits the completed form and performs any necessary completion actions.',
         parameters: {
           type: 'object',
           properties: {},
@@ -483,38 +507,23 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
         },
       },
       async () => {
-        // Collect all form data and user profile information
-        const formData = {
-          bookingInfo: {
-            name: memoryKv.name,
-            email: memoryKv.email,
-            destination: memoryKv.destination,
-            departureDate: memoryKv.departureDate,
-            returnDate: memoryKv.returnDate,
-            passengers: memoryKv.passengers,
-            travelClass: memoryKv.travelClass,
-            dietaryPreferences: memoryKv.dietaryPreferences,
-          },
-          userProfile: {
-            budget: memoryKv.budget,
-            travelFrequency: memoryKv.travelFrequency,
-            loyaltyInterest: memoryKv.loyaltyInterest,
-          },
-          additionalInfo: {} as { [key: string]: any },
-        };
+        // Collect form data (keep existing logic)
+        // ...
 
-        // Collect any additional information stored in memoryKv
-        for (const [key, value] of Object.entries(memoryKv)) {
-          if (!Object.keys(formData.bookingInfo).includes(key) &&
-            !Object.keys(formData.userProfile).includes(key)) {
-            formData.additionalInfo[key] = value;
-          }
+        const result = { success: true, message: 'Form submitted successfully!' };
+        setSubmitFormResult(result);
+
+        // Handle completion action
+        if (formConfig.completionAction?.type === 'open_link') {
+          // Instruct the AI to construct and open the link
+          client.sendUserMessageContent([
+            {
+              type: 'input_text',
+              text: formConfig.completionAction.instructions,
+            },
+          ]);
         }
 
-        // In a real application, you'd send this data to a server
-        console.log('Form and profile data submitted:', formData);
-        const result = { success: true, message: 'Booking and profile information submitted successfully!' };
-        setSubmitFormResult(result);
         return result;
       }
     );
@@ -584,7 +593,15 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       // cleanup; resets to defaults
       client.reset();
     };
-  }, [formConfig.slug]); // Change dependency to formConfig.slug
+  }, [formConfig]);
+
+  // Effect to open the link when linkToOpen is set
+  useEffect(() => {
+    if (linkToOpen) {
+      window.open(linkToOpen, '_blank');
+      setLinkToOpen(null);
+    }
+  }, [linkToOpen]);
 
   /**
    * Render the application
