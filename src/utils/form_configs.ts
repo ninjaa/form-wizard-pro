@@ -73,6 +73,22 @@ Workflow:
 3. Once confirmed, proceed with the form questions as outlined in the previous workflow
 4. After every 2-3 questions, provide a brief summary of the information collected so far
 5. Use the collected information to personalize subsequent questions and make relevant suggestions
+
+Additional Instructions:
+- When constructing URLs or processing form data, use all relevant information collected during the conversation.
+- For date fields, consider calculating the age if needed (e.g., for a child's birthday).
+- Be flexible and adaptive when processing the collected data for various purposes.
+- When using the submit_form function, include all collected data that might be relevant for the form's purpose.
+- After submitting the form, if a completion action is specified (like opening a link), use the open_link function to construct and open the appropriate URL.
+- When constructing URLs for the open_link function, ensure all relevant data is included in the query parameters.
+
+Example workflow for form submission and link opening:
+1. Use the submit_form function to submit all collected data.
+2. If the form has a completion action of type 'open_link':
+   a. Construct the URL using the base URL and relevant query parameters from the collected data.
+   b. Use the open_link function with the constructed URL.
+
+Remember to adapt your approach based on the specific requirements of each form configuration.
 `;
 }
 
@@ -174,7 +190,10 @@ export const formConfigs: FormConfig[] = [
     },
     completionAction: {
       type: 'open_link',
-      instructions: `After form submission, construct a URL for the Best Parents search page using the collected information. The base URL is "https://www.bestparents.com/search". Add relevant query parameters based on the child's age, interests, and location. For example: ?query=USA+medicine+camps+for+16+year+olds`
+      instructions: `After form submission, construct a URL for the Best Parents search page using the collected information. The base URL is "https://www.bestparents.com/search". Add relevant query parameters based on the child's age, interests, and location. For example: ?query=USA+medicine+camps+for+16+year+olds
+      
+      Show the full link in the teleprompter too!
+      `
     }
   },
 ];

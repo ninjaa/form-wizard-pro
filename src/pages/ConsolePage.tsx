@@ -27,7 +27,7 @@ import { Teleprompter } from '../components/Teleprompter/Teleprompter';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
-import { FormConfig, getInstructions } from '../utils/form_configs';
+import { FormConfig, getInstructions, formConfigs } from '../utils/form_configs';
 
 /**
  * Type for result from get_weather() function call
@@ -144,6 +144,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
   const teleprompterRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState(48); // Initial font size
+
+  // Add this new state for openLinkUrl
+  const [openLinkUrl, setOpenLinkUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (teleprompterRef.current) {
@@ -498,11 +501,61 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       }
     );
 
-    // Add submit_form tool
+    // Add calculate_age tool
+    client.addTool(
+      {
+        name: 'calculate_age',
+        description: 'Calculates age based on a given birthdate.',
+        parameters: {
+          type: 'object',
+          properties: {
+            birthdate: {
+              type: 'string',
+              description: 'Birthdate in YYYY-MM-DD format',
+            },
+          },
+          required: ['birthdate'],
+        },
+      },
+      ({ birthdate }: { birthdate: string }) => {
+        const birth = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+          age--;
+        }
+        return { age };
+      }
+    );
+
+    // Add open_link tool
+    client.addTool(
+      {
+        name: 'open_link',
+        description: 'Opens a link in a new tab based on the collected information.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open, including any query parameters.',
+            },
+          },
+          required: ['url'],
+        },
+      },
+      async ({ url }: { url: string }) => {
+        setOpenLinkUrl(url);
+        return { success: true, message: 'Link opened successfully.' };
+      }
+    );
+
+    // Simplify submit_form tool
     client.addTool(
       {
         name: 'submit_form',
-        description: 'Submits the completed booking form and user profile information.',
+        description: 'Submits the completed form data.',
         parameters: {
           type: 'object',
           properties: {},
@@ -510,38 +563,14 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
         },
       },
       async () => {
-        // Collect all form data and user profile information
-        const formData = {
-          bookingInfo: {
-            name: memoryKv.name,
-            email: memoryKv.email,
-            destination: memoryKv.destination,
-            departureDate: memoryKv.departureDate,
-            returnDate: memoryKv.returnDate,
-            passengers: memoryKv.passengers,
-            travelClass: memoryKv.travelClass,
-            dietaryPreferences: memoryKv.dietaryPreferences,
-          },
-          userProfile: {
-            budget: memoryKv.budget,
-            travelFrequency: memoryKv.travelFrequency,
-            loyaltyInterest: memoryKv.loyaltyInterest,
-          },
-          additionalInfo: {} as { [key: string]: any },
-        };
-
-        // Collect any additional information stored in memoryKv
-        for (const [key, value] of Object.entries(memoryKv)) {
-          if (!Object.keys(formData.bookingInfo).includes(key) &&
-            !Object.keys(formData.userProfile).includes(key)) {
-            formData.additionalInfo[key] = value;
-          }
-        }
+        // Collect all form data
+        const formData = { ...memoryKv };
 
         // In a real application, you'd send this data to a server
-        console.log('Form and profile data submitted:', formData);
-        const result = { success: true, message: 'Booking and profile information submitted successfully!' };
+        console.log('Form data submitted:', formData);
+        const result = { success: true, message: 'Form information submitted successfully!' };
         setSubmitFormResult(result);
+
         return result;
       }
     );
@@ -637,6 +666,15 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       </div>
     </div>
   );
+
+  // Add this useEffect to open the link when openLinkUrl is set
+  useEffect(() => {
+    if (openLinkUrl) {
+      alert(`oepning link ${openLinkUrl}`);
+      window.open(openLinkUrl, '_blank');
+      setOpenLinkUrl(null);
+    }
+  }, [openLinkUrl]);
 
   /**
    * Render the application
@@ -892,6 +930,14 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
           }
         />
       </div>
+      {/* Add this near the submit form result display */}
+      {submitFormResult && openLinkUrl && (
+        <Button
+          label="Open Search Results"
+          buttonStyle="action"
+          onClick={() => window.open(openLinkUrl, '_blank')}
+        />
+      )}
     </div>
   );
 }
