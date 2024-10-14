@@ -56,6 +56,11 @@ interface RealtimeEvent {
   event: { [key: string]: any };
 }
 
+interface SubmitFormResult {
+  success: boolean;
+  message: string;
+}
+
 export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   /**
    * Ask user for API Key
@@ -130,6 +135,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
   // Add this new state
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
+
+  const [submitFormResult, setSubmitFormResult] = useState<SubmitFormResult | null>(null);
 
   /**
    * Utility for formatting the timing of logs
@@ -506,7 +513,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
         // In a real application, you'd send this data to a server
         console.log('Form and profile data submitted:', formData);
-        return { success: true, message: 'Booking and profile information submitted successfully!' };
+        const result = { success: true, message: 'Booking and profile information submitted successfully!' };
+        setSubmitFormResult(result);
+        return result;
       }
     );
 
@@ -745,6 +754,19 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
               </div>
             </div>
             <div className="content-right">
+              <div className="content-block submit-form">
+                <div className="content-block-title">submit_form()</div>
+                <div className="content-block-body">
+                  {submitFormResult ? (
+                    <div>
+                      <p>Success: {submitFormResult.success ? 'Yes' : 'No'}</p>
+                      <p>Message: {submitFormResult.message}</p>
+                    </div>
+                  ) : (
+                    <p>Waiting for form submission...</p>
+                  )}
+                </div>
+              </div>
               <div className="content-block map">
                 <div className="content-block-title">get_weather()</div>
                 <div className="content-block-title bottom">
