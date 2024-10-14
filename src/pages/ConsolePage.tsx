@@ -138,7 +138,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
   const [submitFormResult, setSubmitFormResult] = useState<SubmitFormResult | null>(null);
 
-  const [linkToOpen, setLinkToOpen] = useState<string | null>(null);
+  // Add these new state variables inside the ConsolePage component
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   /**
    * Utility for formatting the timing of logs
@@ -426,6 +428,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
           newKv[key] = value;
           return newKv;
         });
+        updateCurrentStep(key); // Update the current step
         return { ok: true };
       }
     );
@@ -473,33 +476,11 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       }
     );
 
-    // Add open_link tool
-    client.addTool(
-      {
-        name: 'open_link',
-        description: 'Opens a specified URL in a new tab.',
-        parameters: {
-          type: 'object',
-          properties: {
-            url: {
-              type: 'string',
-              description: 'The URL to open.',
-            },
-          },
-          required: ['url'],
-        },
-      },
-      async ({ url }: { url: string }) => {
-        setLinkToOpen(url);
-        return { success: true, message: 'Link ready to be opened.' };
-      }
-    );
-
-    // Modify submit_form tool
+    // Add submit_form tool
     client.addTool(
       {
         name: 'submit_form',
-        description: 'Submits the completed form and performs any necessary completion actions.',
+        description: 'Submits the completed booking form and user profile information.',
         parameters: {
           type: 'object',
           properties: {},
@@ -507,23 +488,38 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
         },
       },
       async () => {
-        // Collect form data (keep existing logic)
-        // ...
+        // Collect all form data and user profile information
+        const formData = {
+          bookingInfo: {
+            name: memoryKv.name,
+            email: memoryKv.email,
+            destination: memoryKv.destination,
+            departureDate: memoryKv.departureDate,
+            returnDate: memoryKv.returnDate,
+            passengers: memoryKv.passengers,
+            travelClass: memoryKv.travelClass,
+            dietaryPreferences: memoryKv.dietaryPreferences,
+          },
+          userProfile: {
+            budget: memoryKv.budget,
+            travelFrequency: memoryKv.travelFrequency,
+            loyaltyInterest: memoryKv.loyaltyInterest,
+          },
+          additionalInfo: {} as { [key: string]: any },
+        };
 
-        const result = { success: true, message: 'Form submitted successfully!' };
-        setSubmitFormResult(result);
-
-        // Handle completion action
-        if (formConfig.completionAction?.type === 'open_link') {
-          // Instruct the AI to construct and open the link
-          client.sendUserMessageContent([
-            {
-              type: 'input_text',
-              text: formConfig.completionAction.instructions,
-            },
-          ]);
+        // Collect any additional information stored in memoryKv
+        for (const [key, value] of Object.entries(memoryKv)) {
+          if (!Object.keys(formData.bookingInfo).includes(key) &&
+            !Object.keys(formData.userProfile).includes(key)) {
+            formData.additionalInfo[key] = value;
+          }
         }
 
+        // In a real application, you'd send this data to a server
+        console.log('Form and profile data submitted:', formData);
+        const result = { success: true, message: 'Booking and profile information submitted successfully!' };
+        setSubmitFormResult(result);
         return result;
       }
     );
@@ -593,15 +589,32 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       // cleanup; resets to defaults
       client.reset();
     };
-  }, [formConfig]);
+  }, [formConfig.slug]); // Change dependency to formConfig.slug
 
-  // Effect to open the link when linkToOpen is set
+  // Add this useEffect hook to update the progress
   useEffect(() => {
-    if (linkToOpen) {
-      window.open(linkToOpen, '_blank');
-      setLinkToOpen(null);
+    const totalSteps = Object.keys(formConfig.steps).length;
+    const newProgress = Math.round((currentStep / totalSteps) * 100);
+    setProgress(newProgress);
+  }, [currentStep, formConfig.steps]);
+
+  // Add this function to update the current step
+  const updateCurrentStep = (stepName: string) => {
+    const stepIndex = Object.keys(formConfig.steps).indexOf(stepName);
+    if (stepIndex !== -1) {
+      setCurrentStep(stepIndex + 1);
     }
-  }, [linkToOpen]);
+  };
+
+  // Update the ProgressBar component
+  const ProgressBar = () => (
+    <div className="progress-container">
+      <div className="progress-label">Progress: {progress}%</div>
+      <div className="progress-bar">
+        <div className="progress" style={{ width: `${progress}%` }}></div>
+      </div>
+    </div>
+  );
 
   /**
    * Render the application
@@ -609,7 +622,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   return (
     <div data-component="ConsolePage" data-console-hidden={!isConsoleVisible}>
       <div className="teleprompter-container">
-        <Teleprompter text={teleprompterText} />
+        <div className="teleprompter">{teleprompterText}</div>
+        <ProgressBar />
       </div>
       {isConsoleVisible && (
         <>
