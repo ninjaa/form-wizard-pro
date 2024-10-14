@@ -64,8 +64,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
   const apiKey = LOCAL_RELAY_SERVER_URL
     ? ''
     : localStorage.getItem('tmp::voice_api_key') ||
-      prompt('OpenAI API Key') ||
-      '';
+    prompt('OpenAI API Key') ||
+    '';
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
@@ -87,9 +87,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       LOCAL_RELAY_SERVER_URL
         ? { url: LOCAL_RELAY_SERVER_URL }
         : {
-            apiKey: apiKey,
-            dangerouslyAllowAPIKeyInBrowser: true,
-          }
+          apiKey: apiKey,
+          dangerouslyAllowAPIKeyInBrowser: true,
+        }
     )
   );
 
@@ -492,8 +492,8 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
 
         // Collect any additional information stored in memoryKv
         for (const [key, value] of Object.entries(memoryKv)) {
-          if (!Object.keys(formData.bookingInfo).includes(key) && 
-              !Object.keys(formData.userProfile).includes(key)) {
+          if (!Object.keys(formData.bookingInfo).includes(key) &&
+            !Object.keys(formData.userProfile).includes(key)) {
             formData.additionalInfo[key] = value;
           }
         }
@@ -576,6 +576,9 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
    */
   return (
     <div data-component="ConsolePage">
+      <div className="teleprompter-container">
+        <Teleprompter text={teleprompterText} />
+      </div>
       <div className="content-top">
         <div className="content-title">
           <img src="/openai-logomark.svg" />
@@ -592,9 +595,6 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
             />
           )}
         </div>
-      </div>
-      <div className="teleprompter-container">
-        <Teleprompter text={teleprompterText} />
       </div>
       <div className="content-main">
         <div className="content-logs">
@@ -639,11 +639,10 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
                         }}
                       >
                         <div
-                          className={`event-source ${
-                            event.type === 'error'
+                          className={`event-source ${event.type === 'error'
                               ? 'error'
                               : realtimeEvent.source
-                          }`}
+                            }`}
                         >
                           {realtimeEvent.source === 'client' ? (
                             <ArrowUp />
@@ -713,7 +712,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
                               (conversationItem.formatted.audio?.length
                                 ? '(awaiting transcript)'
                                 : conversationItem.formatted.text ||
-                                  '(item sent)')}
+                                '(item sent)')}
                           </div>
                         )}
                       {!conversationItem.formatted.tool &&
@@ -735,34 +734,6 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
                 );
               })}
             </div>
-          </div>
-          <div className="content-actions">
-            <Toggle
-              defaultValue={false}
-              labels={['manual', 'vad']}
-              values={['none', 'server_vad']}
-              onChange={(_, value) => changeTurnEndType(value)}
-            />
-            <div className="spacer" />
-            {isConnected && canPushToTalk && (
-              <Button
-                label={isRecording ? 'release to send' : 'push to talk'}
-                buttonStyle={isRecording ? 'alert' : 'regular'}
-                disabled={!isConnected || !canPushToTalk}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-              />
-            )}
-            <div className="spacer" />
-            <Button
-              label={isConnected ? 'disconnect' : 'connect'}
-              iconPosition={isConnected ? 'end' : 'start'}
-              icon={isConnected ? X : Zap}
-              buttonStyle={isConnected ? 'regular' : 'action'}
-              onClick={
-                isConnected ? disconnectConversation : connectConversation
-              }
-            />
           </div>
         </div>
         <div className="content-right">
@@ -799,6 +770,34 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
             </div>
           </div>
         </div>
+      </div>
+      <div className="content-actions">
+        <Toggle
+          defaultValue={false}
+          labels={['manual', 'vad']}
+          values={['none', 'server_vad']}
+          onChange={(_, value) => changeTurnEndType(value)}
+        />
+        <div className="spacer" />
+        {isConnected && canPushToTalk && (
+          <Button
+            label={isRecording ? 'release to send' : 'push to talk'}
+            buttonStyle={isRecording ? 'alert' : 'regular'}
+            disabled={!isConnected || !canPushToTalk}
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+          />
+        )}
+        <div className="spacer" />
+        <Button
+          label={isConnected ? 'disconnect' : 'connect'}
+          iconPosition={isConnected ? 'end' : 'start'}
+          icon={isConnected ? X : Zap}
+          buttonStyle={isConnected ? 'regular' : 'action'}
+          onClick={
+            isConnected ? disconnectConversation : connectConversation
+          }
+        />
       </div>
     </div>
   );
