@@ -28,6 +28,7 @@ import { Teleprompter } from '../components/Teleprompter/Teleprompter';
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
 import { FormConfig, getInstructions, formConfigs } from '../utils/form_configs';
+import confetti from 'canvas-confetti';
 
 /**
  * Type for result from get_weather() function call
@@ -546,6 +547,7 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
         },
       },
       async ({ url }: { url: string }) => {
+        console.log(`Opening link ${url}`);
         setOpenLinkUrl(url);
         return { success: true, message: 'Link opened successfully.' };
       }
@@ -567,9 +569,12 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
         const formData = { ...memoryKv };
 
         // In a real application, you'd send this data to a server
-        console.log('Form data submitted:', formData);
+        console.log('Form data submitted:', JSON.stringify(formData, null, 2));
         const result = { success: true, message: 'Form information submitted successfully!' };
         setSubmitFormResult(result);
+
+        // Trigger confetti effect
+        triggerConfetti();
 
         return result;
       }
@@ -675,6 +680,15 @@ export function ConsolePage({ formConfig }: { formConfig: FormConfig }) {
       setOpenLinkUrl(null);
     }
   }, [openLinkUrl]);
+
+  // Add this function to trigger confetti
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
 
   /**
    * Render the application
