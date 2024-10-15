@@ -32,13 +32,6 @@ Teleprompter Usage:
 - Update the teleprompter immediately after processing the user's response and before asking the next question
 - Keep teleprompter text concise and easy to read
 
-Workflow:
-1. Update teleprompter with the next question or information
-2. Speak the question or information displayed on the teleprompter
-3. Process the user's response
-4. Save the response using set_memory
-5. Repeat from step 1 for the next question
-
 Remember to use tools and functions available, especially set_memory for form state and user facts. Be discreet when collecting optional information and respect the user's privacy.
 `;
 
@@ -46,7 +39,7 @@ function createInstructions(config: FormConfig): string {
   let completionInstructions = '';
   if (config.completionAction && config.completionAction.type === 'open_link') {
     completionInstructions = `
-Completion Action:
+Completion Actions (must carry out at end):
 ${config.completionAction.instructions}
 `;
   }
@@ -75,12 +68,12 @@ Important:
 - Periodically summarize the information collected so far and use it in the conversation to personalize the experience.
 - If the user provides information out of order, adapt and fill in the appropriate fields.
 
-Workflow:
+Overall Workflow:
 1. Greet the user and explain the purpose of the form
 2. Ask if they're ready to begin
 3. Once confirmed, proceed with the form questions as outlined in the previous workflow
 4. After every 2-3 questions, provide a brief summary of the information collected so far. 
-5. Make sure to use the teleprompter to relay information back so the user can fix spellings etc
+5. Make sure to use the teleprompter to relay information back so the user can fix spellings etc. Always keep the teleprompter up to date.
 6. Use the collected information to personalize subsequent questions and make relevant suggestions
 7. If there's a lot of background noise or too much back and forth, occasionally delicately suggest the user try another time cos it's noisy.
 
